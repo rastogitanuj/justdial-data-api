@@ -1,12 +1,15 @@
 import sys
+sys.path.append('beautifulsoup4-4.2.1')
 from bs4 import BeautifulSoup
 import urllib2
 import time
 import traceback
 
 class justSpider(object):
-    
-    def __init__(self, city, entity = "Gyms")
+    """
+    """
+
+    def __init__(self, city, entity = "Gyms"):
         self.city = city
         self.entity = entity
     
@@ -29,8 +32,8 @@ class justSpider(object):
         try:
             for e in sections:
                 if e.get('class') is not None:
-                if "jrcl" in e['class']:
-                    jrcls.append(e)
+                    if "jrcl" in e['class']:
+                        jrcls.append(e)
         except Exception as exp:
             print str(exp), traceback.format_exc()
             raise exp
@@ -54,7 +57,9 @@ class justSpider(object):
                 print str(exp), traceback.format_exc()
                 raise exp
 
+        resultstr = ""
         for gym in gyms:
-            print gym[0]+",", gym[1]
+            resultstr+= str(gym[0])+", "+str(gym[1])+"</br>"
     
-        print "Done page #:",page_no
+        print "Done page"
+        return resultstr
