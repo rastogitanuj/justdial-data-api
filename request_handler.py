@@ -28,7 +28,14 @@ class showGyms(webapp2.RequestHandler):
     def get(self):
         city_name = self.request.get('city_name')
         spider = justSpider(city_name)
-        self.response.write(spider.parsePage())
+        output = ""
+        for page_no in xrange(1,3):
+            try:
+                output += spider.parsePage(page_no)
+                #self.response.write(output)
+            except Exception as exp:
+                output += "Exception encontered in page number "+str(page_no)+": "+str(exp)+"<br/>"
+        self.response.write(output)
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),
