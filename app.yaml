@@ -9,6 +9,8 @@ handlers:
   script: request_handler.application
 - url: /showGyms
   script: request_handler.application
+- url: /showCities
+  script: request_handler.application
 
 libraries:
 - name: webapp2

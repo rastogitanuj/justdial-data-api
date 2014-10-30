@@ -6,8 +6,8 @@ import time
 import traceback
 
 class justSpider(object):
-    """
-    """
+    
+    """Spider responsible for crawling justdial"""
 
     def __init__(self, city, entity = "Gyms"):
         self.city = city
@@ -63,3 +63,29 @@ class justSpider(object):
     
         print "Done page"
         return resultstr
+
+class citySpider(object):
+
+    def parse(self):
+        url = "http://en.wikipedia.org/wiki/List_of_most_populous_cities_in_India"
+        
+        try:
+            page = urllib2.urlopen(url)
+        except Exception as exp:
+            print str(exp), traceback.format_exc()
+            raise exp
+
+        src = BeautifulSoup(page.read())
+
+        table = src.table
+
+        tr = table.find_all('tr')[1:] # first row contains the Field names
+
+        city_list = []
+
+        for row in tr:
+            data = row.find_all('a')
+            city_list.append( (data[0].text, data[1].text) )
+
+        return city_list
+
