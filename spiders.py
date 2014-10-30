@@ -41,25 +41,62 @@ class justSpider(object):
         gyms = []
         for e in jrcls:
             try:
-                p = e.find_all('p')[:2] # first 2 paragraphs contain relevent information.
+                
+                p = e.find_all('p')[:3] # first 3 paragraphs contain relevent information.
                 name = p[0].find_all('a')
-                if len(name) >=2:
+                
+                if len(name) >=2: # for gym-name and number
                     if p[1]['class'][0].strip() == "jrcw":
-                        gyms.append( (name[1].text, p[1].text) ) # Gym name and number are appended as a tuple
+                        gym_name = name[1]["title"]
+                        gym_url = name[1]["href"]
+                        gym_num = p[1].text
                     else:
-                        gyms.append( (name[1].text, "N.A") )
+                        gym_name = name[1]["title"]
+                        gym_url = name[1]["href"]
+                        gym_num = "N.A"
                 else:
-                    if p[1]['class'][0].strip() == "jrcw":
-                        gyms.append( (p[0].a.text, p[1].text) )
+                    if p[1]['class'][0].strip() == "jrcw": # Gym number is not present
+                        gym_name = p[0].a["title"]
+                        gym_url = p[0].a["href"]
+                        gym_num = p[1].text
                     else:
-                        gyms.append( (p[0].a.text, "N.A") )
+                        gym_name = p[0].a["title"]
+                        gym_url = p[0].a["href"]
+                        gym_num = "N.A"
+                
+                spans = p[2].find_all("span")
+                gym_add = spans[2].text.strip()
+                
+                """A mini algorithm for removing " in place ,city_name" suffix attached with each gym name"""
+                namelen = len(gym_name)
+                cut = namelen
+                for i in xrange(namelen-3):
+                    state = 0
+                    if state == 0 and gym_name[i] == ' ':
+                        state = 1
+                    if state == 1 and gym_name[i+1] == 'i':
+                        state = 2
+                    if state == 2 and gym_name[i+2] == 'n':
+                        state = 3
+                    if state == 3 and gym_name[i+3] == ' ':
+                        state = 4
+                    if state == 4:
+                        cut = i
+                        break
+                gym_name = gym_name[:cut]
+                """ algorithm complete"""
+                
+                gyms.append((gym_name, gym_num, gym_add, gym_url))
+
             except Exception as exp:
                 print str(exp), traceback.format_exc()
                 raise exp
 
         resultstr = ""
+        cnt = 1
         for gym in gyms:
-            resultstr+= str(gym[0])+", "+str(gym[1])+"</br>"
+            resultstr+= str(cnt)+'. '+gym[0]+"</br>"+gym[1]+"</br>"+gym[2]+"</br>"+gym[3]+"</br>"+"<hr/>"
+            cnt+=1
     
         print "Done page"
         return resultstr
