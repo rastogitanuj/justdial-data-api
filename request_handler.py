@@ -1,6 +1,7 @@
 import webapp2
 import traceback
 from spiders import justSpider, citySpider
+import city_mods
 
 class MainPage(webapp2.RequestHandler):
 
@@ -14,6 +15,9 @@ class MainPage(webapp2.RequestHandler):
         <br/><hr/>
         <form action="/showCities" method="get">
             <input type = 'submit' value='See citites'>
+        </form>
+        <form action="/refreshCities" method="get">
+            <input type = 'submit' value='Refresh City Data'>
         </form>
       </body>
     </html>
@@ -44,17 +48,29 @@ class showGyms(webapp2.RequestHandler):
 class showCities(webapp2.RequestHandler):
 
     def get(self):
-
-        spider = citySpider()
-        output = ""
+        city_list = city_mods.fetchCityData()
+        output = "Cities stored in the database:<hr/>"
         cno = 1
-        for city in spider.parse():
-            output+= str(cno)+". "+city[0]+" -- "+city[1]+"<br/>"
+        for city in city_list:
+            output+= str(cno)+". "+city[0]+" -- "+city[1]+" -- "+str(city[2])+" -- "+city[3]+"<br/>"
+            cno+=1
+        self.response.write(output)
+
+class refreshCityData(webapp2.RequestHandler):
+
+    def get(self):
+        city_mods.refreshData()
+        city_list = city_mods.fetchCityData()
+        output = "Cities stored in the database:<hr/>"
+        cno = 1
+        for city in city_list:
+            output+= str(cno)+". "+city[0]+" -- "+city[1]+" -- "+str(city[2])+" -- "+city[3]+"<br/>"
             cno+=1
         self.response.write(output)
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/showGyms', showGyms),
-    ('/showCities', showCities)
+    ('/showCities', showCities),
+    ('/refreshCities', refreshCityData)
 ], debug=True)

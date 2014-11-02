@@ -121,8 +121,13 @@ class citySpider(object):
         city_list = []
 
         for row in tr:
-            data = row.find_all('a')
-            city_list.append( (data[0].text, data[1].text) )
+            data = row.find_all('td')
+            name = data[1].text.split('(')
+            city_name = name[0].split('[')[0]
+            alt_name = None
+            if len(name) > 1:
+                print name
+                alt_name = name[1][:-1]
+            city_list.append( ( city_name, data[4].text, alt_name) )
 
         return city_list
-
