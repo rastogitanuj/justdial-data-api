@@ -5,3 +5,9 @@ class cityDB(ndb.Model):
 	state_name = ndb.StringProperty()
 	alt_name = ndb.StringProperty()
 	city_state = ndb.StringProperty()
+
+class gymDB(ndb.Model):
+	gym_name = ndb.StringProperty()
+  	gym_number = ndb.StringProperty()
+	gym_address = ndb.StringProperty()
+	gym_city = ndb.StringProperty(indexed = True)

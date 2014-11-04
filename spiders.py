@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import urllib2
 import time
 import traceback
+from google.appengine.api import urlfetch
 
 class justSpider(object):
     
@@ -18,7 +19,8 @@ class justSpider(object):
         url = "http://www.justdial.com/"+self.city+"/"+self.entity+"/page-"+str(page_no)
         
         try:
-            page = urllib2.urlopen(url)
+            page = urllib2.urlopen(url, timeout = 20)
+            urlfetch.set_default_fetch_deadline(20)
         except Exception as exp:
             print str(exp), traceback.format_exc()
             raise exp
@@ -38,7 +40,10 @@ class justSpider(object):
             print str(exp), traceback.format_exc()
             raise exp
 
-        gyms = []
+        if len(jrcls) == 0: #No more gyms
+            return None
+
+        gym_list = []
         for e in jrcls:
             try:
                 
@@ -47,25 +52,26 @@ class justSpider(object):
                 
                 if len(name) >=2: # for gym-name and number
                     if p[1]['class'][0].strip() == "jrcw":
-                        gym_name = name[1]["title"]
-                        gym_url = name[1]["href"]
                         gym_num = p[1].text
                     else:
-                        gym_name = name[1]["title"]
-                        gym_url = name[1]["href"]
-                        gym_num = "N.A"
+                        
+                        gym_num = None
+                    gym_name = name[1]["title"]
+                    gym_url = name[1]["href"].split('/')[-1]
                 else:
                     if p[1]['class'][0].strip() == "jrcw": # Gym number is not present
-                        gym_name = p[0].a["title"]
-                        gym_url = p[0].a["href"]
                         gym_num = p[1].text
                     else:
-                        gym_name = p[0].a["title"]
-                        gym_url = p[0].a["href"]
-                        gym_num = "N.A"
+                        gym_num = None
+                    gym_name = p[0].a["title"]
+                    gym_url = p[0].a["href"].split('/')[-1]
                 
-                spans = p[2].find_all("span")
-                gym_add = spans[2].text.strip()
+                if gym_num is not None:
+                    spans = p[2].find_all("span")
+                    gym_add = spans[2].text.strip()
+                else:
+                    spans = p[1].find_all("span")
+                    gym_add = spans[1].text.strip()
                 
                 """A mini algorithm for removing " in place ,city_name" suffix attached with each gym name"""
                 namelen = len(gym_name)
@@ -86,20 +92,15 @@ class justSpider(object):
                 gym_name = gym_name[:cut]
                 """ algorithm complete"""
                 
-                gyms.append((gym_name, gym_num, gym_add, gym_url))
+                gym_list.append((gym_name, gym_num, gym_add, gym_url))
 
             except Exception as exp:
+                #print "****************\n", name,"\n*******************"
                 print str(exp), traceback.format_exc()
                 raise exp
-
-        resultstr = ""
-        cnt = 1
-        for gym in gyms:
-            resultstr+= str(cnt)+'. '+gym[0]+"</br>"+gym[1]+"</br>"+gym[2]+"</br>"+gym[3]+"</br>"+"<hr/>"
-            cnt+=1
     
-        print "Done page"
-        return resultstr
+        print "*******************************\nDone page: "+str(page_no)
+        return gym_list
 
 class citySpider(object):
 
