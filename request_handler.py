@@ -52,7 +52,7 @@ class showCities(webapp2.RequestHandler):
         output = "Cities stored in the database:<hr/>"
         cno = 1
         for city in city_list:
-            output+= str(cno)+". "+city[0]+" -- "+city[1]+" -- "+str(city[2])+" -- "+city[3]+"<br/>"
+            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+city[2]+"  ---  "+str(city[3])+"<br/>"
             cno+=1
         self.response.write(output)
 
@@ -64,7 +64,7 @@ class refreshCityData(webapp2.RequestHandler):
         output = "Cities stored in the database:<hr/>"
         cno = 1
         for city in city_list:
-            output+= str(cno)+". "+city[0]+" -- "+city[1]+" -- "+str(city[2])+" -- "+city[3]+"<br/>"
+            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+city[2]+"  ---  "+str(city[3])+"<br/>"
             cno+=1
         self.response.write(output)
 

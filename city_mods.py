@@ -30,7 +30,7 @@ def fetchCityData():
 		entity_list = city_query.fetch()
 		city_list = []
 		for entity in entity_list:
-			city_list.append((entity.city_name, entity.city_state, entity.alt_name, entity.city_state))
+			city_list.append((entity.city_name, entity.state_name, entity.city_state, entity.alt_name))
 	except Exception as exp:
 		raise exp
 	return city_list
