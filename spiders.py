@@ -47,31 +47,45 @@ class justSpider(object):
         for e in jrcls:
             try:
                 
-                p = e.find_all('p')[:3] # first 3 paragraphs contain relevent information.
-                name = p[0].find_all('a')
-                
-                if len(name) >=2: # for gym-name and number
-                    if p[1]['class'][0].strip() == "jrcw":
-                        gym_num = p[1].text
-                    else:
-                        
-                        gym_num = None
-                    gym_name = name[1]["title"]
-                    gym_url = name[1]["href"].split('/')[-1]
-                else:
-                    if p[1]['class'][0].strip() == "jrcw": # Gym number is not present
-                        gym_num = p[1].text
-                    else:
-                        gym_num = None
-                    gym_name = p[0].a["title"]
-                    gym_url = p[0].a["href"].split('/')[-1]
-                
-                if gym_num is not None:
-                    spans = p[2].find_all("span")
-                    gym_add = spans[2].text.strip()
-                else:
-                    spans = p[1].find_all("span")
-                    gym_add = spans[1].text.strip()
+                p = e.find_all('p') # first 3 paragraphs contain relevent information.
+
+                gym_num = None
+                gym_add = None
+                gym_name = None
+
+                for para in p:
+
+                    if para['class'][0].strip() == "jcnwrp":
+
+                        spans = para.find_all('span')
+                        for span in spans:
+
+                            if span['class'][0].strip() == "jcn":
+
+                                gym_name = span.a["title"]
+                                gym_url = span.a["href"].split('/')[-1]
+
+                    elif para['class'][0].strip() == "jrcw":
+                        gym_num = para.text.strip()
+
+                    elif para['class'][0].strip() == "jaid":
+
+                        spans = para.find_all('span')
+                        for span in spans:
+
+                            if span['class'][0].strip() == "jaddt":
+
+                                spans2 = span.find_all('span')
+                                for span2 in spans2:
+                                    if span2['class'][0].strip() == "mrehover":
+                                         gym_add = span2.text.strip()
+
+                if gym_name is None:
+                    raise Exception("Assertion Failed. Gym must have a name")
+
+                if gym_add is None:
+                    print "$$$$\nIgnoring address-less gyms:", gym_name
+                    continue
                 
                 """A mini algorithm for removing " in place ,city_name" suffix attached with each gym name"""
                 namelen = len(gym_name)
@@ -95,11 +109,10 @@ class justSpider(object):
                 gym_list.append((gym_name, gym_num, gym_add, gym_url))
 
             except Exception as exp:
-                #print "****************\n", name,"\n*******************"
                 print str(exp), traceback.format_exc()
                 raise exp
     
-        print "*******************************\nDone page: "+str(page_no)
+        print "Done page: "+str(page_no)
         return gym_list
 
 class citySpider(object):
