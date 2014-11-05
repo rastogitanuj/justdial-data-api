@@ -8,14 +8,15 @@ class MainPage(webapp2.RequestHandler):
     MAIN_PAGE_HTML ="""
     <html>
       <body>
-        <form action="/showGyms" method="get">
-            City Name: <input type='text' name = 'city_name'/>
-            <input type = 'submit' value='Go'>
+        <form action="/fetchGymData" method="get">
+            Mine gyms in city: <input type='text' name = 'city_name'/>
+            <input type = 'submit' value='Fetch Data'>
         </form>
         <br/><hr/>
-        <form action="/fetchGymData" method="get">
-            City Name: <input type='text' name = 'city_name'/>
-            <input type = 'submit' value='Fetch Data'>
+        Before viewing any city, first mine it above.<hr/>
+        <form action="/showGyms" method="get">
+            View gyms in city: <input type='text' name = 'city_name'/>
+            <input type = 'submit' value='Go'>
         </form>
         <br/><hr/>
         <form action="/showCities" method="get">
@@ -36,13 +37,13 @@ class MainPage(webapp2.RequestHandler):
         except Exception as e:
             print e
 
-class fetchGymData(webapp2.RequestHandler):
+class mineGymData(webapp2.RequestHandler):
 
     def get(self):
         city_name = self.request.get('city_name')
-        gym_mods.getGymData(city_name)
+        gym_mods.mineGymData(city_name)
 
-class showGyms(webapp2.RequestHandler):
+class crawlGyms(webapp2.RequestHandler):
 
     def get(self):
         city_name = self.request.get('city_name')
@@ -61,6 +62,23 @@ class showGyms(webapp2.RequestHandler):
             except Exception as exp:
                 output += "Exception encontered in page number "+str(page_no)+": "+str(exp)+"<br/>"
         self.response.write(output)
+
+class showGyms(webapp2.RequestHandler):
+
+    def get(self):
+        resultstr = ""
+        try:
+            city_name = self.request.get('city_name')
+            gym_list = gym_mods.fetchGymData(city_name)
+            cnt = 1
+            for gym in gym_list:
+                resultstr+= str(cnt)+'. '+gym[0]+"</br>"+gym[1]+"</br>"+gym[2]+"</br>"+"<hr/>"
+                cnt+=1
+        except Exception as exp:
+            print "Exception: "+str(exp), traceback.format_exc()
+        self.response.write(resultstr)
+
+
 
 class showCities(webapp2.RequestHandler):
 
@@ -87,8 +105,9 @@ class refreshCityData(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),
+    ('/crawlGyms', crawlGyms),
     ('/showGyms', showGyms),
     ('/showCities', showCities),
     ('/refreshCities', refreshCityData),
-    ('/fetchGymData', fetchGymData)
+    ('/mineGymData', mineGymData)
 ], debug=True)

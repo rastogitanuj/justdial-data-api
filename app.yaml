@@ -9,11 +9,13 @@ handlers:
   script: request_handler.application
 - url: /showGyms
   script: request_handler.application
+- url: /crawlGyms
+  script: request_handler.application
 - url: /showCities
   script: request_handler.application
 - url: /refreshCities
   script: request_handler.application
-- url: /fetchGymData
+- url: /mineGymData
   script: request_handler.application
 
 libraries:
