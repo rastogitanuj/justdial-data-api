@@ -8,7 +8,7 @@ class MainPage(webapp2.RequestHandler):
     MAIN_PAGE_HTML ="""
     <html>
       <body>
-        <form action="/fetchGymData" method="get">
+        <form action="/mineGymData" method="get">
             Mine gyms in city: <input type='text' name = 'city_name'/>
             <input type = 'submit' value='Fetch Data'>
         </form>
@@ -72,7 +72,7 @@ class showGyms(webapp2.RequestHandler):
             gym_list = gym_mods.fetchGymData(city_name)
             cnt = 1
             for gym in gym_list:
-                resultstr+= str(cnt)+'. '+gym[0]+"</br>"+gym[1]+"</br>"+gym[2]+"</br>"+"<hr/>"
+                resultstr+= str(cnt)+'. '+gym[0]+"</br>"+str(gym[1])+"</br>"+gym[2]+"</br>"+"<hr/>"
                 cnt+=1
         except Exception as exp:
             print "Exception: "+str(exp), traceback.format_exc()
@@ -87,7 +87,7 @@ class showCities(webapp2.RequestHandler):
         output = "Cities stored in the database:<hr/>"
         cno = 1
         for city in city_list:
-            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+city[2]+"  ---  "+str(city[3])+"<br/>"
+            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+str(city[2])+"<br/>"
             cno+=1
         self.response.write(output)
 
@@ -99,9 +99,21 @@ class refreshCityData(webapp2.RequestHandler):
         output = "Cities stored in the database:<hr/>"
         cno = 1
         for city in city_list:
-            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+city[2]+"  ---  "+str(city[3])+"<br/>"
+            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+str(city[2])+"<br/>"
             cno+=1
         self.response.write(output)
+
+class upadteGyms(webapp2.RequestHandler):
+
+    def get(self):
+        cities_updated = gym_mods.updateGymData()
+        if cities_updated is None:
+            self.response.write("All gyms updated")
+        else:
+            output = "List of cities updated: <br\>"
+            for city in cities_updated:
+                output+=str(city)+"<br/>"
+            self.response.write(output)
 
 application = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -109,5 +121,6 @@ application = webapp2.WSGIApplication([
     ('/showGyms', showGyms),
     ('/showCities', showCities),
     ('/refreshCities', refreshCityData),
-    ('/mineGymData', mineGymData)
+    ('/mineGymData', mineGymData),
+    ('/updateGyms', upadteGyms)
 ], debug=True)

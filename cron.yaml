@@ -1,0 +1,4 @@
+cron:
+- description: update gym databse
+  url: /updateGyms
+  schedule: every monday 9:00

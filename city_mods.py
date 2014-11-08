@@ -2,6 +2,7 @@ from spiders import citySpider
 from datastore import cityDB
 from google.appengine.ext import ndb
 import traceback
+import datetime as dt
 
 def refreshData():
 	try:
@@ -19,9 +20,12 @@ def refreshData():
 		"""Store fresh cities"""
 		entity_list = []
 		for city in city_list:
-			mykey = ndb.Key('cityDB',city[0])
-			if cityDB.get_by_id(city[0]) is None:
-				entity = cityDB(key = mykey, city_name = city[0], alt_name = city[2], state_name = city[1], city_state = city[0]+'_'+city[1])
+			mykey = ndb.Key('cityDB',city[0].lower())
+			if cityDB.get_by_id( city[0].lower() ) is None:
+				entity = cityDB(
+					key = mykey, city_name = city[0], alt_name = city[2], city_state = city[0]+'_'+city[1], 
+					timestamp = dt.datetime(2000,1,1,0,0,0,0)
+					)
 			else:
 				raise Exception("Assertion Fail. Two cities with same name encountered")
 			entity_list.append(entity)
@@ -36,7 +40,7 @@ def fetchCityData():
 		entity_list = city_query.fetch()
 		city_list = []
 		for entity in entity_list:
-			city_list.append((entity.city_name, entity.state_name, entity.city_state, entity.alt_name))
+			city_list.append((entity.city_name, entity.city_state, entity.alt_name))
 	except Exception as exp:
 		print str(exp), traceback.format_exc()
 		raise exp
