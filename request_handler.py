@@ -2,27 +2,28 @@ import webapp2
 import traceback
 from spiders import justSpider, citySpider
 import city_mods, gym_mods
+import json
 
 class MainPage(webapp2.RequestHandler):
 
     MAIN_PAGE_HTML ="""
     <html>
       <body>
-        <form action="/mineGymData" method="get">
+        <form action="/humans/mineGymData" method="get">
             Mine gyms in city: <input type='text' name = 'city_name'/>
             <input type = 'submit' value='Fetch Data'>
         </form>
         <br/><hr/>
         Before viewing any city, first mine it above.<hr/>
-        <form action="/showGyms" method="get">
+        <form action="/humans/showGyms" method="get">
             View gyms in city: <input type='text' name = 'city_name'/>
             <input type = 'submit' value='Go'>
         </form>
         <br/><hr/>
-        <form action="/showCities" method="get">
+        <form action="/humans/showCities" method="get">
             <input type = 'submit' value='See citites'>
         </form>
-        <form action="/refreshCities" method="get">
+        <form action="/humans/refreshCities" method="get">
             <input type = 'submit' value='Refresh City Data'>
         </form>
       </body>
@@ -87,7 +88,7 @@ class showCities(webapp2.RequestHandler):
         output = "Cities stored in the database:<hr/>"
         cno = 1
         for city in city_list:
-            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+str(city[2])+"<br/>"
+            output+= str(cno)+". "+city[0]+"  ---  "+str(city[1])+"<br/>"
             cno+=1
         self.response.write(output)
 
@@ -99,7 +100,7 @@ class refreshCityData(webapp2.RequestHandler):
         output = "Cities stored in the database:<hr/>"
         cno = 1
         for city in city_list:
-            output+= str(cno)+". "+city[0]+"  ---  "+city[1]+"  ---  "+str(city[2])+"<br/>"
+            output+= str(cno)+". "+city[0]+"  ---  "+str(city[1])+"<br/>"
             cno+=1
         self.response.write(output)
 
@@ -115,12 +116,52 @@ class upadteGyms(webapp2.RequestHandler):
                 output+=str(city)+"<br/>"
             self.response.write(output)
 
+class API(webapp2.RequestHandler):
+
+    def get(self):
+        city_name = self.request.get('city_name')
+        gym_data = gym_mods.fetchGymData(city_name)
+        data = []
+        for gym in gym_data:
+            data.append({'gym_name':gym[0],'gym_number':gym[1],'gym_address':gym[2]})
+        output = json.dumps(data)
+        self.response.write(output)
+
+class MAIN(webapp2.RequestHandler):
+
+    HTML =""" 
+    <html> 
+      <body>
+        <h3>Instructions:</h3>
+        <br/>
+        * Use <b>/api?city_name=<city_name></b> url to get appropriate json responses<br/>
+        * Only mined cities <br/>
+        * mining for any particular city can be triggered manually using url: <b>/humans/mineGymData/?city_name=<city-name></b> <br/>
+        <hr/>
+        * Below is the list of cities which have been mined (data is available in the data-store):<br/>
+    """
+
+    def get(self):
+        city_list = city_mods.getValidCities()
+        cno = 1
+        for city in city_list:
+            self.HTML+= str(cno)+". "+city+"<br/>"
+            cno+=1
+        self.HTML+="</body></html>"
+
+        self.response.write(self.HTML)
+
+
+
+
 application = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/crawlGyms', crawlGyms),
-    ('/showGyms', showGyms),
-    ('/showCities', showCities),
-    ('/refreshCities', refreshCityData),
-    ('/mineGymData', mineGymData),
-    ('/updateGyms', upadteGyms)
+    ('/humans/', MainPage),
+    ('/humans/crawlGyms', crawlGyms),
+    ('/humans/showGyms', showGyms),
+    ('/humans/showCities', showCities),
+    ('/humans/refreshCities', refreshCityData),
+    ('/humans/mineGymData', mineGymData),
+    ('/humans/updateGyms', upadteGyms),
+    ('/api', API),
+    ('/',MAIN)
 ], debug=True)

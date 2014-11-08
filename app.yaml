@@ -5,19 +5,23 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /humans/
+  script: request_handler.application
+- url: /humans/showGyms
+  script: request_handler.application
+- url: /humans/crawlGyms
+  script: request_handler.application
+- url: /humans/showCities
+  script: request_handler.application
+- url: /humans/refreshCities
+  script: request_handler.application
+- url: /humans/mineGymData
+  script: request_handler.application
+- url: /humans/updateGyms
+  script: request_handler.application
+- url: /api
+  script: request_handler.application
 - url: /
-  script: request_handler.application
-- url: /showGyms
-  script: request_handler.application
-- url: /crawlGyms
-  script: request_handler.application
-- url: /showCities
-  script: request_handler.application
-- url: /refreshCities
-  script: request_handler.application
-- url: /mineGymData
-  script: request_handler.application
-- url: /updateGyms
   script: request_handler.application
 
 libraries:

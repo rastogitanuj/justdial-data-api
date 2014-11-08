@@ -6,10 +6,12 @@ import traceback, datetime as dt
 def mineGymData(city_name, single = False, mypage = None):
 
 	spider = justSpider(city_name)
+	
 	if mypage is None:
 		page_no = 1
 	else:
 		page_no = mypage
+
 	city_name = city_name.lower()
 	while True:
 		try:
@@ -18,18 +20,19 @@ def mineGymData(city_name, single = False, mypage = None):
 				break
 
 			entity_list = []
-			for gym in gym_list:
+			for gym in gym_list: #gym tuple is (gym_name, gym_num, gym_add, gym_url)
 				mykey = ndb.Key('gymDB', gym[3])
+				#print page_no, gym[0], gym[1]
 				if city_name in gym[2].lower(): #if gym is in the correct city
 					entity = gymDB.get_by_id(gym[3])
-					if entity is None: # either new entry or same old entry, i.e same city name
+					if entity is None: # entity is new
 						entity_list.append( 
 							gymDB(key = mykey, gym_name = gym[0], gym_number = gym[1], gym_address = gym[2], gym_city = city_name)
 							)
-					elif entity.gym_city ==  city_name:
-						print "*********Duplicate:"
+					elif entity.gym_city ==  city_name: #entity is already present
+						print "*********Duplicate***********"
 						print gym[0], city_name, page_no, len(gym_list), gym[1]
-						print entity.gym_name, entity.gym_city, entity.key, entity.gym_number
+						print entity.gym_name, entity.gym_city, entity.key.id(), entity.gym_number
 						entity_list.append( 
 							gymDB(key = mykey, gym_name = gym[0], gym_number = gym[1], gym_address = gym[2], gym_city = city_name)
 							)
@@ -39,7 +42,6 @@ def mineGymData(city_name, single = False, mypage = None):
 						raise Exception("Assertion Failed in mineGymData, gym_mods.py. gym_name = "+ gym[0])
 
 			ndb.put_multi(entity_list)
-			page_no+=1
 			if single:
 				break
 
@@ -47,6 +49,7 @@ def mineGymData(city_name, single = False, mypage = None):
 			print str(exp), traceback.format_exc()
 			entity = FailTable(fail_city = str(city_name), fail_page_no = page_no)
 			entity.put()
+		page_no+=1
 
 	# updating city's timetamp
 	city_entity = cityDB.get_by_id(city_name)
@@ -70,9 +73,9 @@ def fetchGymData(city_name):
 
 	return gym_list
 
-def updateGymData(lim = 10):
+def updateGymData(lim = 7):
 
-	""" Upadte the gym kind by 'lim' entries"""
+	""" Upadte the gym kind by 'lim' entries """
 
 	freshperiod = dt.timedelta(days = 7) # amount of time for which data should not be updated.
 
@@ -87,15 +90,13 @@ def updateGymData(lim = 10):
 
 	entity_list = city_query.fetch(lim)
 
-	print entity_list,"list", entity_list is None
-
 	if entity_list == [] and failentity_list == []:
 		print "All cities updated."
 		return None # data for all cities has been updated.
 
 	city_list = []
 	for entity in entity_list:
-		city_name = entity.city_name
+		city_name = entity.key.id()
 		print "Mining:", city_name
 		city_list.append(city_name)
 		mineGymData(str(city_name))

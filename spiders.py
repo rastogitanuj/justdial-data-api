@@ -22,7 +22,7 @@ class justSpider(object):
             page = urllib2.urlopen(url, timeout = 20)
             urlfetch.set_default_fetch_deadline(20)
         except Exception as exp:
-            print "Exception in justSpider, urllib",str(exp)#, traceback.format_exc()
+            print "Exception in justSpider, urllib2",str(exp)#, traceback.format_exc()
             raise exp
         
         src = BeautifulSoup(page.read())
@@ -114,7 +114,7 @@ class justSpider(object):
     
         print "Done page: "+str(page_no)
         return gym_list
-        
+
 
 class citySpider(object):
 
@@ -143,6 +143,7 @@ class citySpider(object):
             if len(name) > 1:
                 print name
                 alt_name = name[1][:-1]
-            city_list.append( ( city_name, data[4].text, alt_name) )
+            #city_list.append( ( city_name, data[4].text, alt_name) ) #<- old, data[4].text --> state name
+            city_list.append((city_name, alt_name))
 
         return city_list
