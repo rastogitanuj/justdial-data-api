@@ -19,6 +19,8 @@ handlers:
   script: request_handler.application
 - url: /humans/updateGyms
   script: request_handler.application
+- url: /humans/addCity
+  script: request_handler.application
 - url: /api
   script: request_handler.application
 - url: /

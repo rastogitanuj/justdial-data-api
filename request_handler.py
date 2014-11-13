@@ -20,6 +20,11 @@ class MainPage(webapp2.RequestHandler):
             <input type = 'submit' value='Go'>
         </form>
         <br/><hr/>
+        <form action="/humans/addCity" method="get">
+            Add city: <input type='text' name = 'city_name'/>
+            <input type = 'submit' value='Go'>
+        </form>
+        <br/><hr/>
         <form action="/humans/showCities" method="get">
             <input type = 'submit' value='See citites'>
         </form>
@@ -79,7 +84,15 @@ class showGyms(webapp2.RequestHandler):
             print "Exception: "+str(exp), traceback.format_exc()
         self.response.write(resultstr)
 
+class addNewCity(webapp2.RequestHandler):
 
+    def get(self):
+        city_name = self.request.get('city_name').lower()
+        alt_name = self.request.get('alt_name')
+        if alt_name == '':
+            alt_name = None
+        output = city_mods.add_city(city_name, alt_name)
+        self.response.write(output)
 
 class showCities(webapp2.RequestHandler):
 
@@ -134,9 +147,9 @@ class MAIN(webapp2.RequestHandler):
       <body>
         <h3>Instructions:</h3>
         <br/>
-        * Use <b>/api?city_name=<city_name></b> url to get appropriate json responses<br/>
-        * Only mined cities <br/>
-        * mining for any particular city can be triggered manually using url: <b>/humans/mineGymData/?city_name=<city-name></b> <br/>
+        * Use <b>/api?city_name= "city_name" </b> url to get appropriate json responses<br/>
+        * Only mined cities can return a json reply<br/>
+        * mining for any particular city can be triggered manually using url: <b>/humans/mineGymData?city_name= "city-name" </b> <br/>
         <hr/>
         * Below is the list of cities which have been mined (data is available in the data-store):<br/>
     """
@@ -162,6 +175,7 @@ application = webapp2.WSGIApplication([
     ('/humans/refreshCities', refreshCityData),
     ('/humans/mineGymData', mineGymData),
     ('/humans/updateGyms', upadteGyms),
+    ('/humans/addCity', addNewCity),
     ('/api', API),
     ('/',MAIN)
 ], debug=True)

@@ -38,6 +38,18 @@ def refreshData():
 	except Exception as exp:
 		raise exp
 
+def add_city(city_name, alt_name = None):
+	try:
+		mykey = ndb.Key('cityDB',city_name)
+		if cityDB.get_by_id(city_name) is None:
+			entity = cityDB(key = mykey, alt_name = alt_name, timestamp = dt.datetime(2000,1,1,0,0,0,0))
+			entity.put()
+			return "City added"
+		else:
+			return "City already present"
+	except Exception as exp:
+		raise exp
+
 def fetchCityData():
 	try:
 		city_query = cityDB.query()
